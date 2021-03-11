@@ -1,0 +1,4 @@
+gunicorn
+falcon
+plyvel
+git+https://github.com/y-du/simple-env-var-manager.git@1.0.2
