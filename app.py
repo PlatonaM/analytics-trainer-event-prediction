@@ -19,11 +19,18 @@ from trainer.configuration import conf
 from trainer import handlers
 from trainer import api
 import falcon
+import json
 
 
 initLogger(conf.Logger.level)
 
-stg_handler = handlers.Storage(conf.Storage.path)
+stg_handler = handlers.Storage(st_path=conf.Storage.path)
+configs_handler = handlers.Configs(
+    base_conf=json.loads(conf.MLConfig.base_conf),
+    default_scaler=conf.MLConfig.default_scaler,
+    default_algorithm=conf.MLConfig.default_algorithm
+)
+jobs_handler = handlers.Jobs(stg_handler=stg_handler, check_delay=conf.Jobs.check, max_jobs=conf.Jobs.max_num)
 
 app = falcon.API()
 
@@ -35,3 +42,5 @@ routes = (
 
 for route in routes:
     app.add_route(*route)
+
+jobs_handler.start()
