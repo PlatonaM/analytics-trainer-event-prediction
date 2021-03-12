@@ -37,7 +37,10 @@ app = falcon.API()
 app.req_options.strip_url_path_trailing_slash = True
 
 routes = (
-    ("/models/{service_id}", api.Model(stg_handler=stg_handler)),
+    ("/models", api.Models(stg_handler=stg_handler, conf_handler=configs_handler, jobs_handler=jobs_handler)),
+    ("/models/{model_id}", api.Model(stg_handler=stg_handler)),
+    ("/jobs", api.Jobs(jobs_handler=jobs_handler)),
+    ("/jobs/{job_id}", api.Job(jobs_handler=jobs_handler))
 )
 
 for route in routes:
