@@ -19,6 +19,7 @@ __all__ = ("Storage", )
 
 from ..logger import getLogger
 import plyvel
+import threading
 
 logger = getLogger(__name__.split(".", 1)[-1])
 
@@ -26,18 +27,26 @@ logger = getLogger(__name__.split(".", 1)[-1])
 class Storage:
     def __init__(self, st_path):
         self.__kvs = plyvel.DB(st_path, create_if_missing=True)
+        self.__lock = threading.Lock()
 
-    def put(self, key: bytes, value: bytes):
-        self.__kvs.put(key, value)
+    def put(self, db: bytes, key: bytes, value: bytes):
+        with self.__lock:
+            partition = self.__kvs.prefixed_db(db)
+            partition.put(key, value)
 
-    def get(self, key: bytes) -> bytes:
-        value = self.__kvs.get(key)
-        if not value:
-            raise KeyError(key)
-        return value
+    def get(self, db: bytes, key: bytes) -> bytes:
+        with self.__lock:
+            partition = self.__kvs.prefixed_db(db)
+            value = partition.get(key)
+            if not value:
+                raise KeyError(key)
+            return value
 
-    def delete(self, key: bytes):
-        self.__kvs.delete(key)
+    def delete(self, db: bytes, key: bytes):
+        with self.__lock:
+            partition = self.__kvs.prefixed_db(db)
+            partition.delete(key)
 
     def close(self):
-        self.__kvs.close()
+        with self.__lock:
+            self.__kvs.close()
