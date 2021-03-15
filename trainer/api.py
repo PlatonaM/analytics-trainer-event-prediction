@@ -44,24 +44,19 @@ class Models:
     def on_post(self, req: falcon.request.Request, resp: falcon.response.Response):
         reqDebugLog(req)
         try:
-            data = json.load(req.bounded_stream)
-            config_model_id_list = self.__conf_handler.get_config_model_id_list(
-                service_id=data[model.ModelRequest.service_id],
-                config=data[model.ModelRequest.ml_config]
-            )
-            for item in config_model_id_list:
+            model_req = model.ModelRequest(json.load(req.bounded_stream))
+            model_resp = model.ModelResponse()
+            model_resp.available = list()
+            model_resp.pending = list()
+            for m_id, m_conf in self.__conf_handler.get_model_id_config_list(service_id=model_req.service_id, config=model_req.ml_config):
                 try:
-                    self.__stg_handler.get(b"models-", item[model.ModelResponse.model_id].encode())
+                    self.__stg_handler.get(b"models-", m_id.encode())
+                    model_resp.available.append(m_id)
                 except KeyError:
-                    self.__jobs_handler.create(
-                        {
-                            model.Job.service_id: data[model.ModelRequest.service_id],
-                            model.Job.model_id: item[model.ModelResponse.model_id],
-                            model.Job.config: item[model.ModelResponse.config],
-                        }
-                    )
+                    self.__jobs_handler.create(service_id=model_req.service_id, model_id=m_id, config=m_conf)
+                    model_resp.pending.append(m_id)
             resp.content_type = falcon.MEDIA_JSON
-            resp.body = json.dumps(config_model_id_list)
+            resp.body = json.dumps(dict(model_resp))
             resp.status = falcon.HTTP_200
         except Exception as ex:
             resp.status = falcon.HTTP_500
@@ -130,7 +125,7 @@ class Job:
         reqDebugLog(req)
         try:
             resp.content_type = falcon.MEDIA_JSON
-            resp.body = json.dumps(self.__jobs_handler.get_job(job_id))
+            resp.body = json.dumps(dict(self.__jobs_handler.get_job(job_id)))
             resp.status = falcon.HTTP_200
         except KeyError as ex:
             resp.status = falcon.HTTP_404
