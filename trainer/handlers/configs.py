@@ -47,14 +47,9 @@ class Configs:
         srv_conf_str = service_id + "".join(conf_ls)
         return hashlib.sha256(srv_conf_str.encode()).hexdigest()
 
-    def get_config_model_id_list(self, service_id: str, config: dict) -> list:
-        config_model_list = list()
+    def get_model_id_config_list(self, service_id: str, config: dict) -> list:
+        model_id_config_list = list()
         for config in self.__configs_from_dict(config):
-            config_model_list.append(
-                {
-                    model.ModelResponse.model_id: self.__get_hash(service_id=service_id, config=config),
-                    model.ModelResponse.config: config
-                }
-            )
-        return config_model_list
+            model_id_config_list.append((self.__get_hash(service_id=service_id, config=config), config))
+        return model_id_config_list
 
