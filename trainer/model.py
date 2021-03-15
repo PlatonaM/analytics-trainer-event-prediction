@@ -15,6 +15,9 @@
 """
 
 
+import simple_struct
+
+
 __all__ = ("Job", "JobStatus")
 
 
@@ -26,30 +29,35 @@ class JobStatus:
     aborted = "aborted"
 
 
+@simple_struct.structure
 class Job:
-    id = "id"
-    created = "created"
-    status = "status"
-    model_id = "model_id"
-    config = "config"
-    service_id = "service_id"
-    reason = "reason"
-    time_field = "time_field"
-    sorted_data = "sorted_data"
+    id = None
+    created = None
+    status = JobStatus.pending
+    model_id = None
+    config = None
+    service_id = None
+    reason = None
+    time_field = None
+    sorted_data = None
 
 
+@simple_struct.structure
 class Model:
-    id = "id"
-    created = "created"
-    data = "data"
-    columns = "columns"
+    id = None
+    created = None
+    config = None
+    columns = None
+    data = None
 
 
+@simple_struct.structure
 class ModelRequest:
-    service_id = "service_id"
-    ml_config = "ml_config"
+    service_id = None
+    ml_config = None
 
 
+@simple_struct.structure
 class ModelResponse:
-    model_id = "model_id"
-    config = "config"
+    available = None
+    pending = None
