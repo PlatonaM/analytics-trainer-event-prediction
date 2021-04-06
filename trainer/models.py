@@ -45,7 +45,7 @@ class Model:
     id = None
     created = None
     config = None
-    features = None
+    columns = None
     data = None
     default_values = None
     service_id = None
