@@ -19,7 +19,7 @@ __all__ = ("Model", )
 
 from .logger import getLogger
 from . import handlers
-from . import model
+from . import models
 import falcon
 import json
 
@@ -44,16 +44,16 @@ class Models:
     def on_post(self, req: falcon.request.Request, resp: falcon.response.Response):
         reqDebugLog(req)
         try:
-            model_req = model.ModelRequest(json.load(req.bounded_stream))
-            model_resp = model.ModelResponse()
-            model_resp.available = list()
-            model_resp.pending = list()
-            for m_id, m_conf in self.__conf_handler.get_model_id_config_list(service_id=model_req.service_id, config=model_req.ml_config):
+            model_req = models.ModelRequest(json.load(req.bounded_stream))
+            model_resp = models.ModelResponse(available=list(), pending=list())
+            for m_id, m_conf in self.__conf_handler.get_model_id_config_list(service_id=model_req.service_id, source_id=model_req.source_id, config=model_req.ml_config):
                 try:
                     self.__stg_handler.get(b"models-", m_id.encode())
                     model_resp.available.append(m_id)
                 except KeyError:
-                    self.__jobs_handler.create(service_id=model_req.service_id, model_id=m_id, config=m_conf)
+                    model = models.Model(dict(model_req), id=m_id, config=m_conf)
+                    self.__stg_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
+                    self.__jobs_handler.create(model_id=model.id)
                     model_resp.pending.append(m_id)
             resp.content_type = falcon.MEDIA_JSON
             resp.body = json.dumps(dict(model_resp))
