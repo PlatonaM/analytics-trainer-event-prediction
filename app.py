@@ -30,7 +30,13 @@ configs_handler = handlers.Configs(
     default_scaler=conf.MLConfig.default_scaler,
     default_algorithm=conf.MLConfig.default_algorithm
 )
-jobs_handler = handlers.Jobs(stg_handler=stg_handler, check_delay=conf.Jobs.check, max_jobs=conf.Jobs.max_num)
+data_handler = handlers.Data(api_url=conf.Data.api_url)
+jobs_handler = handlers.Jobs(
+    stg_handler=stg_handler,
+    data_handler=data_handler,
+    check_delay=conf.Jobs.check,
+    max_jobs=conf.Jobs.max_num
+)
 
 app = falcon.API()
 
