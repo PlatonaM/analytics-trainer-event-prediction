@@ -1,5 +1,5 @@
 gunicorn
-falcon
+falcon<3.0.0
 plyvel
 git+https://github.com/y-du/simple-env-var-manager.git@1.0.2
-git+https://github.com/y-du/simple-struct.git
+git+https://github.com/y-du/simple-struct.git@0.2.0
