@@ -35,9 +35,7 @@ class Job:
     created = None
     status = JobStatus.pending
     model_id = None
-    config = None
     reason = None
-    sorted_data = None
 
 
 @simple_struct.structure
