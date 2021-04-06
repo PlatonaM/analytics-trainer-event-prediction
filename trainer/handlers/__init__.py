@@ -16,4 +16,5 @@
 
 from .storage import *
 from .configs import *
+from .data import *
 from .jobs import *
