@@ -18,7 +18,7 @@ __all__ = ("Configs", )
 
 
 from ..logger import getLogger
-from .. import model
+from .. import models
 import itertools
 import hashlib
 
@@ -41,15 +41,15 @@ class Configs:
             conf["ml_algorithm"] = [self.__default_algorithm]
         return [dict(zip(conf, v)) for v in itertools.product(*conf.values())]
 
-    def __get_hash(self, service_id: str, config: dict) -> str:
+    def __get_hash(self, service_id: str, source_id: str, config: dict) -> str:
         conf_ls = ["{}{}".format(key, val) for key, val in config.items()]
         conf_ls.sort()
-        srv_conf_str = service_id + "".join(conf_ls)
+        srv_conf_str = service_id + source_id + "".join(conf_ls)
         return hashlib.sha256(srv_conf_str.encode()).hexdigest()
 
-    def get_model_id_config_list(self, service_id: str, config: dict) -> list:
+    def get_model_id_config_list(self, service_id: str, source_id: str, config: dict) -> list:
         model_id_config_list = list()
         for config in self.__configs_from_dict(config):
-            model_id_config_list.append((self.__get_hash(service_id=service_id, config=config), config))
+            model_id_config_list.append((self.__get_hash(service_id=service_id, source_id=source_id, config=config), config))
         return model_id_config_list
 
