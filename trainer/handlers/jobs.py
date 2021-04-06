@@ -70,6 +70,7 @@ class Worker(threading.Thread):
                     )
                 )
             ).decode()
+            model.created = "{}Z".format(datetime.datetime.utcnow().isoformat())
             self.__stg_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
             self.__job.status = models.JobStatus.finished
         except Exception as ex:
