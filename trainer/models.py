@@ -18,7 +18,7 @@
 import simple_struct
 
 
-__all__ = ("Job", "JobStatus")
+__all__ = ("Job", "JobStatus", "Model", "ModelResponse", "ModelRequest")
 
 
 class JobStatus:
@@ -36,9 +36,7 @@ class Job:
     status = JobStatus.pending
     model_id = None
     config = None
-    service_id = None
     reason = None
-    time_field = None
     sorted_data = None
 
 
@@ -47,14 +45,20 @@ class Model:
     id = None
     created = None
     config = None
-    columns = None
+    features = None
     data = None
+    default_values = None
+    service_id = None
+    source_id = None
+    time_field = None
 
 
 @simple_struct.structure
 class ModelRequest:
     service_id = None
+    source_id = None
     ml_config = None
+    time_field = None
 
 
 @simple_struct.structure
