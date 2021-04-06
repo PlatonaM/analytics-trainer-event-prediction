@@ -1,0 +1,28 @@
+"""
+   Copyright 2021 InfAI (CC SES)
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
+
+__all__ = ("Data", )
+
+
+class Data:
+    def __init__(self, api_url):
+        self.__api_url = api_url
+
+    def get(self, source_id):
+        _columns = ['time', 'location_ec-generator_gesamtwirkleistung', 'location_ec-gesamt_gesamtwirkleistung', 'location_ec-prozess_gesamtwirkleistung', 'location_ec-roboter_gesamtwirkleistung', 'location_roboter-ausgabe_gesamtwirkleistung', 'location_roboter-eingabe_gesamtwirkleistung', 'location_transport-gesamt_gesamtwirkleistung', 'location_wm1-gesamt_gesamtwirkleistung', 'location_wm1-heizung-reinigen_gesamtwirkleistung', 'location_wm1-heizung-trocknung_gesamtwirkleistung', 'location_wm2-gesamt_gesamtwirkleistung', 'location_wm2-heizung-reinigen_gesamtwirkleistung', 'location_wm2-heizung-trocknung_gesamtwirkleistung', 'location_wm2-vakuumpumpe_gesamtwirkleistung', 'module_1_errorcode', 'module_1_errorindex', 'module_1_state', 'module_1_station_1_process_1_errorcode_0', 'module_1_station_1_process_1_errorcode_980', 'module_1_station_2_process_1_errorcode_0', 'module_1_station_2_process_1_errorcode_980', 'module_1_station_31_process_1_errorcode_0', 'module_1_station_31_process_1_errorcode_980', 'module_1_station_31_process_1_errorcode_998', 'module_1_station_3_process_1_errorcode_0', 'module_1_station_3_process_1_errorcode_980', 'module_1_station_4_process_1_errorcode_0', 'module_1_station_4_process_1_errorcode_980', 'module_1_station_5_process_1_errorcode_0', 'module_1_station_5_process_1_errorcode_980', 'module_1_station_6_process_1_errorcode_0', 'module_1_station_6_process_1_errorcode_980', 'module_2_errorcode', 'module_2_errorindex', 'module_2_state', 'module_2_station_1_process_1_errorcode_0', 'module_2_station_21_process_1_errorcode_999', 'module_2_station_22_process_1_errorcode_0', 'module_2_station_22_process_1_errorcode_999', 'module_2_station_24_process_1_errorcode_0', 'module_2_station_25_process_1_errorcode_51', 'module_2_station_25_process_1_errorcode_53', 'module_2_station_25_process_1_errorcode_55', 'module_2_station_28_process_1_errorcode_51', 'module_2_station_28_process_1_errorcode_53', 'module_2_station_28_process_1_errorcode_55', 'module_2_station_28_process_1_errorcode_980', 'module_2_station_29_process_1_errorcode_0', 'module_2_station_3_process_1_errorcode_0', 'module_2_station_3_process_1_errorcode_998', 'module_2_station_4_process_1_errorcode_0', 'module_2_station_4_process_1_errorcode_998', 'module_2_station_50_process_1_errorcode_0', 'module_2_station_51_process_1_errorcode_0', 'module_2_station_51_process_1_errorcode_51', 'module_2_station_51_process_1_errorcode_53', 'module_2_station_51_process_1_errorcode_55', 'module_2_station_5_process_1_errorcode_0', 'module_2_station_5_process_1_errorcode_998', 'module_2_station_6_process_1_errorcode_0', 'module_2_station_6_process_1_errorcode_998', 'module_4_errorcode', 'module_4_errorindex', 'module_4_state', 'module_5_errorcode', 'module_5_errorindex', 'module_5_state', 'module_6_errorcode', 'module_6_errorindex', 'module_6_state']
+        _default_values = {'module_1_station_1_process_1_errorcode_0': 0, 'module_1_station_1_process_1_errorcode_980': 0, 'module_1_station_2_process_1_errorcode_0': 0, 'module_1_station_2_process_1_errorcode_980': 0, 'module_1_station_31_process_1_errorcode_0': 0, 'module_1_station_31_process_1_errorcode_980': 0, 'module_1_station_31_process_1_errorcode_998': 0, 'module_1_station_3_process_1_errorcode_0': 0, 'module_1_station_3_process_1_errorcode_980': 0, 'module_1_station_4_process_1_errorcode_0': 0, 'module_1_station_4_process_1_errorcode_980': 0, 'module_1_station_5_process_1_errorcode_0': 0, 'module_1_station_5_process_1_errorcode_980': 0, 'module_1_station_6_process_1_errorcode_0': 0, 'module_1_station_6_process_1_errorcode_980': 0, 'module_2_station_1_process_1_errorcode_0': 0, 'module_2_station_21_process_1_errorcode_999': 0, 'module_2_station_22_process_1_errorcode_0': 0, 'module_2_station_22_process_1_errorcode_999': 0, 'module_2_station_24_process_1_errorcode_0': 0, 'module_2_station_25_process_1_errorcode_51': 0, 'module_2_station_25_process_1_errorcode_53': 0, 'module_2_station_25_process_1_errorcode_55': 0, 'module_2_station_28_process_1_errorcode_51': 0, 'module_2_station_28_process_1_errorcode_53': 0, 'module_2_station_28_process_1_errorcode_55': 0, 'module_2_station_28_process_1_errorcode_980': 0, 'module_2_station_29_process_1_errorcode_0': 0, 'module_2_station_3_process_1_errorcode_0': 0, 'module_2_station_3_process_1_errorcode_998': 0, 'module_2_station_4_process_1_errorcode_0': 0, 'module_2_station_4_process_1_errorcode_998': 0, 'module_2_station_50_process_1_errorcode_0': 0, 'module_2_station_51_process_1_errorcode_0': 0, 'module_2_station_51_process_1_errorcode_51': 0, 'module_2_station_51_process_1_errorcode_53': 0, 'module_2_station_51_process_1_errorcode_55': 0, 'module_2_station_5_process_1_errorcode_0': 0, 'module_2_station_5_process_1_errorcode_998': 0, 'module_2_station_6_process_1_errorcode_0': 0, 'module_2_station_6_process_1_errorcode_998': 0}
+        _file = "output_all.csv"
+        return _file, _columns, _default_values
