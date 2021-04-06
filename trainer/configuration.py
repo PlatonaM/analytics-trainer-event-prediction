@@ -32,6 +32,10 @@ class Conf:
         path = "/db"
 
     @simple_env_var.section
+    class Data:
+        api_url = "http://test"
+
+    @simple_env_var.section
     class Jobs:
         max_num = 5
         check = 5
