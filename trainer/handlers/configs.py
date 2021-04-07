@@ -14,42 +14,26 @@
    limitations under the License.
 """
 
-__all__ = ("Configs", )
+__all__ = ("get_model_id_config_list", )
 
 
 from ..logger import getLogger
-from .. import models
-import itertools
+from .. import event_prediction_trainer
 import hashlib
 
 
 logger = getLogger(__name__.split(".", 1)[-1])
 
 
-class Configs:
-    def __init__(self, base_conf: dict, default_scaler: str, default_algorithm: str):
-        self.__base_conf = base_conf
-        self.__default_scaler = default_scaler
-        self.__default_algorithm = default_algorithm
+def __get_hash(service_id: str, source_id: str, config: dict) -> str:
+    conf_ls = ["{}{}".format(key, val) for key, val in config.items()]
+    conf_ls.sort()
+    srv_conf_str = service_id + source_id + "".join(conf_ls)
+    return hashlib.sha256(srv_conf_str.encode()).hexdigest()
 
-    def __configs_from_dict(self, config: dict) -> list:
-        conf = self.__base_conf.copy()
-        conf.update(config)
-        if "scaler" not in conf:
-            conf["scaler"] = [self.__default_scaler]
-        if "ml_algorithm" not in conf:
-            conf["ml_algorithm"] = [self.__default_algorithm]
-        return [dict(zip(conf, v)) for v in itertools.product(*conf.values())]
 
-    def __get_hash(self, service_id: str, source_id: str, config: dict) -> str:
-        conf_ls = ["{}{}".format(key, val) for key, val in config.items()]
-        conf_ls.sort()
-        srv_conf_str = service_id + source_id + "".join(conf_ls)
-        return hashlib.sha256(srv_conf_str.encode()).hexdigest()
-
-    def get_model_id_config_list(self, service_id: str, source_id: str, config: dict) -> list:
-        model_id_config_list = list()
-        for config in self.__configs_from_dict(config):
-            model_id_config_list.append((self.__get_hash(service_id=service_id, source_id=source_id, config=config), config))
-        return model_id_config_list
-
+def get_model_id_config_list(service_id: str, source_id: str, config: dict) -> list:
+    model_id_config_list = list()
+    for _config in event_prediction_trainer.config.configs_from_dict(config=config, init=False):
+        model_id_config_list.append((__get_hash(service_id=service_id, source_id=source_id, config=_config), _config))
+    return model_id_config_list
