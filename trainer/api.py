@@ -36,9 +36,8 @@ def reqErrorLog(req, ex):
 
 
 class Models:
-    def __init__(self, stg_handler: handlers.Storage, conf_handler: handlers.Configs, jobs_handler: handlers.Jobs):
+    def __init__(self, stg_handler: handlers.Storage, jobs_handler: handlers.Jobs):
         self.__stg_handler = stg_handler
-        self.__conf_handler = conf_handler
         self.__jobs_handler = jobs_handler
 
     def on_post(self, req: falcon.request.Request, resp: falcon.response.Response):
@@ -46,7 +45,7 @@ class Models:
         try:
             model_req = models.ModelRequest(json.load(req.bounded_stream))
             model_resp = models.ModelResponse(available=list(), pending=list())
-            for m_id, m_conf in self.__conf_handler.get_model_id_config_list(service_id=model_req.service_id, source_id=model_req.source_id, config=model_req.ml_config):
+            for m_id, m_conf in handlers.configs.get_model_id_config_list(service_id=model_req.service_id, source_id=model_req.source_id, config=model_req.ml_config):
                 try:
                     self.__stg_handler.get(b"models-", m_id.encode())
                     model_resp.available.append(m_id)
