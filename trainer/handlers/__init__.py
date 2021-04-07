@@ -15,6 +15,6 @@
 """
 
 from .storage import *
-from .configs import *
+from . import configs
 from .data import *
 from .jobs import *
