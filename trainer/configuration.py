@@ -40,11 +40,5 @@ class Conf:
         max_num = 5
         check = 5
 
-    @simple_env_var.section
-    class MLConfig:
-        base_conf = '{"sampling_frequency": ["5S"], "imputations_technique_str": ["pad"], "imputation_technique_num": ["pad"], "ts_fresh_window_length": [30], "ts_fresh_window_end": [30], "ts_fresh_minimal_features": [true], "balance_ratio": [0.5], "random_state": [[0]], "cv": [5], "oversampling_method": [false]}'
-        default_scaler = "StandardScaler"
-        default_algorithm = "RandomForestClassifier"
-
 
 conf = Conf(load=False)
