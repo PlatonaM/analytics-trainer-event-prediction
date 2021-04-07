@@ -19,17 +19,11 @@ from trainer.configuration import conf
 from trainer import handlers
 from trainer import api
 import falcon
-import json
 
 
 initLogger(conf.Logger.level)
 
 stg_handler = handlers.Storage(st_path=conf.Storage.path)
-configs_handler = handlers.Configs(
-    base_conf=json.loads(conf.MLConfig.base_conf),
-    default_scaler=conf.MLConfig.default_scaler,
-    default_algorithm=conf.MLConfig.default_algorithm
-)
 data_handler = handlers.Data(api_url=conf.Data.api_url)
 jobs_handler = handlers.Jobs(
     stg_handler=stg_handler,
@@ -43,7 +37,7 @@ app = falcon.API()
 app.req_options.strip_url_path_trailing_slash = True
 
 routes = (
-    ("/models", api.Models(stg_handler=stg_handler, conf_handler=configs_handler, jobs_handler=jobs_handler)),
+    ("/models", api.Models(stg_handler=stg_handler, jobs_handler=jobs_handler)),
     ("/models/{model_id}", api.Model(stg_handler=stg_handler)),
     ("/jobs", api.Jobs(jobs_handler=jobs_handler)),
     ("/jobs/{job_id}", api.Job(jobs_handler=jobs_handler))
