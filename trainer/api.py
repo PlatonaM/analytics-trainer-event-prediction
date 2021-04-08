@@ -47,8 +47,11 @@ class Models:
             model_resp = models.ModelResponse(available=list(), pending=list())
             for m_id, m_conf in handlers.configs.get_model_id_config_list(service_id=model_req.service_id, source_id=model_req.source_id, config=model_req.ml_config):
                 try:
-                    self.__stg_handler.get(b"models-", m_id.encode())
-                    model_resp.available.append(m_id)
+                    model = models.Model(json.loads(self.__stg_handler.get(b"models-", m_id.encode())))
+                    if model.data:
+                        model_resp.available.append(m_id)
+                    else:
+                        model_resp.pending.append(m_id)
                 except KeyError:
                     model = models.Model(dict(model_req), id=m_id, config=m_conf)
                     self.__stg_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
