@@ -119,7 +119,12 @@ class Jobs:
         reqDebugLog(req)
         try:
             resp.content_type = falcon.MEDIA_JSON
-            resp.body = json.dumps(self.__jobs_handler.list_jobs())
+            resp.body = json.dumps(
+                dict(
+                    current=self.__jobs_handler.list_jobs(),
+                    history=self.__stg_handler.list_keys(b"jobs-")
+                )
+            )
             resp.status = falcon.HTTP_200
         except Exception as ex:
             resp.status = falcon.HTTP_500
