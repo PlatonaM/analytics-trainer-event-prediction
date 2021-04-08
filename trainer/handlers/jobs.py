@@ -77,6 +77,7 @@ class Worker(threading.Thread):
             self.__job.status = models.JobStatus.failed
             self.__job.reason = str(ex)
             logger.error("{}: failed - {}".format(self.__job.id, ex))
+        self.__stg_handler.put(b"jobs-", self.__job.id.encode(), json.dumps(dict(self.__job)).encode())
         self.done = True
 
 
