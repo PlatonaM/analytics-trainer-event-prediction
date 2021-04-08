@@ -112,8 +112,20 @@ class Model:
 
 
 class Jobs:
-    def __init__(self, jobs_handler: handlers.Jobs):
+    def __init__(self, stg_handler: handlers.Storage, jobs_handler: handlers.Jobs):
+        self.__stg_handler = stg_handler
         self.__jobs_handler = jobs_handler
+
+    def on_post(self, req: falcon.request.Request, resp: falcon.response.Response):
+        reqDebugLog(req)
+        try:
+            req_body = json.load(req.bounded_stream)
+            resp.body = self.__jobs_handler.create(req_body["model_id"])
+            resp.content_type = falcon.MEDIA_TEXT
+            resp.status = falcon.HTTP_200
+        except Exception as ex:
+            resp.status = falcon.HTTP_500
+            reqErrorLog(req, ex)
 
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response):
         reqDebugLog(req)
