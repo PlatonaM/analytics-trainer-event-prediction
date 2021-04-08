@@ -47,6 +47,12 @@ class Storage:
             partition = self.__kvs.prefixed_db(db)
             partition.delete(key)
 
+    def list_keys(self, db: bytes) -> list:
+        with self.__lock:
+            partition = self.__kvs.prefixed_db(db)
+            with partition.iterator() as it:
+                return [key.decode() for key, _ in it]
+
     def close(self):
         with self.__lock:
             self.__kvs.close()
