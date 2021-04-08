@@ -101,7 +101,6 @@ class Jobs(threading.Thread):
             created="{}Z".format(datetime.datetime.utcnow().isoformat())
         )
         self.__job_pool[job.id] = job
-        # self.__stg_handler.put(b"jobs-", job.id.encode(), json.dumps(dict(job)).encode())
         self.__job_queue.put_nowait(job.id)
         return job.id
 
