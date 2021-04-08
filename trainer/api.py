@@ -121,9 +121,6 @@ class Jobs:
             resp.content_type = falcon.MEDIA_JSON
             resp.body = json.dumps(self.__jobs_handler.list_jobs())
             resp.status = falcon.HTTP_200
-        except KeyError as ex:
-            resp.status = falcon.HTTP_404
-            reqErrorLog(req, ex)
         except Exception as ex:
             resp.status = falcon.HTTP_500
             reqErrorLog(req, ex)
