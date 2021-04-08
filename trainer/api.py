@@ -101,14 +101,14 @@ class Model:
     #         resp.status = falcon.HTTP_500
     #         reqErrorLog(req, ex)
 
-    # def on_delete(self, req: falcon.request.Request, resp: falcon.response.Response, service_id: str):
-    #     reqDebugLog(req)
-    #     try:
-    #         self.__stg_handler.delete(service_id.encode())
-    #         resp.status = falcon.HTTP_200
-    #     except Exception as ex:
-    #         resp.status = falcon.HTTP_500
-    #         reqErrorLog(req, ex)
+    def on_delete(self, req: falcon.request.Request, resp: falcon.response.Response, model_id: str):
+        reqDebugLog(req)
+        try:
+            self.__stg_handler.delete(b"models-", model_id.encode())
+            resp.status = falcon.HTTP_200
+        except Exception as ex:
+            resp.status = falcon.HTTP_500
+            reqErrorLog(req, ex)
 
 
 class Jobs:
