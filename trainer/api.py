@@ -40,6 +40,16 @@ class Models:
         self.__stg_handler = stg_handler
         self.__jobs_handler = jobs_handler
 
+    def on_get(self, req: falcon.request.Request, resp: falcon.response.Response):
+        reqDebugLog(req)
+        try:
+            resp.content_type = falcon.MEDIA_JSON
+            resp.body = json.dumps(self.__stg_handler.list_keys(b"models-"))
+            resp.status = falcon.HTTP_200
+        except Exception as ex:
+            resp.status = falcon.HTTP_500
+            reqErrorLog(req, ex)
+
     def on_post(self, req: falcon.request.Request, resp: falcon.response.Response):
         reqDebugLog(req)
         try:
