@@ -132,14 +132,18 @@ class Jobs:
 
 
 class Job:
-    def __init__(self, jobs_handler: handlers.Jobs):
+    def __init__(self,  stg_handler: handlers.Storage, jobs_handler: handlers.Jobs):
+        self.__stg_handler = stg_handler
         self.__jobs_handler = jobs_handler
 
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, job_id):
         reqDebugLog(req)
         try:
             resp.content_type = falcon.MEDIA_JSON
-            resp.body = json.dumps(dict(self.__jobs_handler.get_job(job_id)))
+            try:
+                resp.body = json.dumps(dict(self.__jobs_handler.get_job(job_id)))
+            except KeyError:
+                resp.body = self.__stg_handler.get(b"jobs-", job_id.encode())
             resp.status = falcon.HTTP_200
         except KeyError as ex:
             resp.status = falcon.HTTP_404
