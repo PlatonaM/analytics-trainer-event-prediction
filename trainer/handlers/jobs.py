@@ -73,6 +73,7 @@ class Worker(threading.Thread):
             model.created = "{}Z".format(datetime.datetime.utcnow().isoformat())
             self.__stg_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
             self.__job.status = models.JobStatus.finished
+            logger.debug("{}: completed successfully".format(self.__job.id))
         except Exception as ex:
             self.__job.status = models.JobStatus.failed
             self.__job.reason = str(ex)
@@ -95,6 +96,7 @@ class Jobs(threading.Thread):
     def create(self, model_id: str) -> str:
         for job in self.__job_pool.values():
             if job.model_id == model_id:
+                logger.debug("job for model '{}' already exists".format(model_id))
                 return job.id
         job = models.Job(
             id=uuid.uuid4().hex,
@@ -102,6 +104,7 @@ class Jobs(threading.Thread):
             created="{}Z".format(datetime.datetime.utcnow().isoformat())
         )
         self.__job_pool[job.id] = job
+        logger.debug("created job for model '{}'".format(model_id))
         self.__job_queue.put_nowait(job.id)
         return job.id
 
