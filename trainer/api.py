@@ -55,7 +55,7 @@ class Models:
         try:
             model_req = models.ModelRequest(json.load(req.bounded_stream))
             model_resp = models.ModelResponse(available=list(), pending=list())
-            for m_id, m_conf in handlers.configs.get_model_id_config_list(service_id=model_req.service_id, source_id=model_req.source_id, config=model_req.ml_config):
+            for m_id, m_conf in handlers.configs.get_model_id_config_list(service_id=model_req.service_id, config=model_req.ml_config):
                 try:
                     model = models.Model(json.loads(self.__stg_handler.get(b"models-", m_id.encode())))
                     if model.data:
