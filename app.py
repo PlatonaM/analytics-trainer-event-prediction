@@ -23,8 +23,8 @@ import falcon
 
 initLogger(conf.Logger.level)
 
-stg_handler = handlers.Storage(st_path=conf.Storage.path)
 data_handler = handlers.Data(api_url=conf.Data.api_url)
+stg_handler = handlers.Storage(st_path=conf.Storage.db_path)
 jobs_handler = handlers.Jobs(
     stg_handler=stg_handler,
     data_handler=data_handler,
