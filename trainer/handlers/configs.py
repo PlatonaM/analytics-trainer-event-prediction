@@ -25,15 +25,15 @@ import hashlib
 logger = getLogger(__name__.split(".", 1)[-1])
 
 
-def __get_hash(service_id: str, source_id: str, config: dict) -> str:
+def __get_hash(service_id: str, config: dict) -> str:
     conf_ls = ["{}{}".format(key, val) for key, val in config.items()]
     conf_ls.sort()
-    srv_conf_str = service_id + source_id + "".join(conf_ls)
+    srv_conf_str = service_id + "".join(conf_ls)
     return hashlib.sha256(srv_conf_str.encode()).hexdigest()
 
 
-def get_model_id_config_list(service_id: str, source_id: str, config: dict) -> list:
+def get_model_id_config_list(service_id: str, config: dict) -> list:
     model_id_config_list = list()
     for _config in event_prediction_trainer.config.configs_from_dict(config=config, init=False):
-        model_id_config_list.append((__get_hash(service_id=service_id, source_id=source_id, config=_config), _config))
+        model_id_config_list.append((__get_hash(service_id=service_id, config=_config), _config))
     return model_id_config_list
