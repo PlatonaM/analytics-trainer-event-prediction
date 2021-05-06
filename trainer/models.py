@@ -47,14 +47,12 @@ class Model:
     data = None
     default_values = None
     service_id = None
-    source_id = None
     time_field = None
 
 
 @simple_struct.structure
 class ModelRequest:
     service_id = None
-    source_id = None
     ml_config = None
     time_field = None
 
