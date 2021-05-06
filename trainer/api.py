@@ -28,11 +28,11 @@ logger = getLogger(__name__.split(".", 1)[-1])
 
 
 def reqDebugLog(req):
-    logger.debug("method='{}' path='{}' content_type='{}'".format(req.method, req.path, req.content_type))
+    logger.debug("method='{}' path='{}' content_type='{}'".format(req.method, req.db_path, req.content_type))
 
 
 def reqErrorLog(req, ex):
-    logger.error("method='{}' path='{}' - {}".format(req.method, req.path, ex))
+    logger.error("method='{}' path='{}' - {}".format(req.method, req.db_path, ex))
 
 
 class Models:

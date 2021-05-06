@@ -29,7 +29,7 @@ class Conf:
 
     @simple_env_var.section
     class Storage:
-        path = "/db"
+        db_path = "/db"
 
     @simple_env_var.section
     class Data:
