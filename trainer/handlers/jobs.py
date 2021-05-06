@@ -49,7 +49,11 @@ class Worker(threading.Thread):
             self.__job.status = models.JobStatus.running
             model = models.Model(json.loads(self.__stg_handler.get(b"models-", self.__job.model_id.encode())))
             config = event_prediction_trainer.config.config_from_dict(model.config)
-            file_path, model.columns, model.default_values = self.__data_handler.get(model.source_id)
+            file_path, model.columns, model.default_values = self.__data_handler.get(
+                srv_id=model.service_id,
+                time_field=model.time_field,
+                delimiter=","
+            )
             logger.debug(
                 "{}: training model for prediction of '{}' for '{}' ...".format(
                     self.__job.id, config["target_errorCode"],
