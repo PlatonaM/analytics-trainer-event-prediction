@@ -18,7 +18,7 @@
 import simple_struct
 
 
-__all__ = ("Job", "JobStatus", "Model", "ModelResponse", "ModelRequest")
+__all__ = ("Job", "JobStatus", "Model", "ModelResponse", "ModelRequest", "DataSource")
 
 
 class JobStatus:
@@ -61,3 +61,11 @@ class ModelRequest:
 class ModelResponse:
     available = None
     pending = None
+
+
+@simple_struct.structure
+class DataSource:
+    id = None
+    start = None
+    end = None
+    year_map = None
