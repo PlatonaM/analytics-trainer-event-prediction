@@ -38,7 +38,7 @@ class Conf:
         export_api_url = "http://test"
         time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
         db_api_time_format = "2006-01-02T15:04:05.000000Z07:00"
-        start_year = 1000
+        start_year = 1970
         chunk_size = 50000
         usr_id = None
         max_age = 21600
