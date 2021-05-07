@@ -2,7 +2,7 @@ FROM platonam/data-science-base:latest
 
 RUN apt-get update && apt-get install -y git
 
-RUN mkdir /db
+RUN mkdir /db && mkdir /data_cache
 
 WORKDIR /usr/src/app
 
