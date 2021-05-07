@@ -91,9 +91,9 @@ class Data(threading.Thread):
         return self.__get_data(measurement=measurement, sort="desc", limit=1)[0][0]
 
     def __get_chunks(self, measurement: str, start: str, end: str):
-        start = datetime.datetime.strptime(start, self.__time_format) - datetime.timedelta(seconds=1)
+        start = datetime.datetime.strptime(start, self.__time_format) - datetime.timedelta(microseconds=1)
         start = start.isoformat() + "Z"
-        end = datetime.datetime.strptime(end, self.__time_format) + datetime.timedelta(seconds=1)
+        end = datetime.datetime.strptime(end, self.__time_format) + datetime.timedelta(microseconds=1)
         end = end.isoformat() + "Z"
         while True:
             chunk = self.__get_data(measurement=measurement, sort="asc", limit=self.__chunk_size, time={"start": start, "end": end})
@@ -201,9 +201,9 @@ class Data(threading.Thread):
             return cache_item.file_name, cache_item.columns, cache_item.default_values
 
     def run(self) -> None:
+        stale_items = list()
         while True:
             time.sleep(self.__max_age / 2)
-            stale_items = list()
             with self.__lock:
                 for key, item in self.__cache.items():
                     if time.time() - item.last_accessed > self.__max_age and not item.lock.locked():
@@ -214,3 +214,4 @@ class Data(threading.Thread):
                     except Exception:
                         pass
                     del self.__cache[key]
+            stale_items.clear()
