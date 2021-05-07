@@ -74,8 +74,8 @@ class Data(threading.Thread):
         resp = requests.post(
             url="{}?format=table&order_direction={}&order_column_index=0&time_format={}".format(
                 self.__db_api_url,
-                self.__db_api_time_format,
-                sort
+                sort,
+                self.__db_api_time_format
             ),
             headers={"X-UserId": self.__usr_id},
             json=[kwargs]
