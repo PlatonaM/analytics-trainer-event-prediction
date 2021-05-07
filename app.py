@@ -26,14 +26,14 @@ initLogger(conf.Logger.level)
 stg_handler = handlers.Storage(st_path=conf.Storage.db_path)
 data_handler = handlers.Data(
     st_path=conf.Storage.data_cache_path,
-    db_api_url=conf.CacheItem.db_api_url,
-    export_api_url=conf.CacheItem.export_api_url,
-    time_format=conf.CacheItem.time_format,
-    db_api_time_format=conf.CacheItem.db_api_time_format,
-    start_year=conf.CacheItem.start_year,
-    chunk_size=conf.CacheItem.chunk_size,
-    usr_id=conf.CacheItem.usr_id,
-    max_age=conf.CacheItem.max_age
+    db_api_url=conf.Data.db_api_url,
+    export_api_url=conf.Data.export_api_url,
+    time_format=conf.Data.time_format,
+    db_api_time_format=conf.Data.db_api_time_format,
+    start_year=conf.Data.start_year,
+    chunk_size=conf.Data.chunk_size,
+    usr_id=conf.Data.usr_id,
+    max_age=conf.Data.max_age
 )
 jobs_handler = handlers.Jobs(
     stg_handler=stg_handler,
