@@ -59,3 +59,4 @@ for route in routes:
 
 jobs_handler.start()
 skd_handler.start()
+data_handler.start()
