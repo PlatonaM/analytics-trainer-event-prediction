@@ -20,7 +20,7 @@ __all__ = ("Jobs",)
 from ..logger import getLogger
 from .. import event_prediction_trainer
 from .. import models
-from . import Storage, Data
+from . import DB, Data
 import threading
 import queue
 import typing
@@ -36,9 +36,9 @@ logger = getLogger(__name__.split(".", 1)[-1])
 
 
 class Worker(threading.Thread):
-    def __init__(self, job: models.Job, stg_handler: Storage, data_handler: Data):
+    def __init__(self, job: models.Job, db_handler: DB, data_handler: Data):
         super().__init__(name="jobs-worker-{}".format(job.id), daemon=True)
-        self.__stg_handler = stg_handler
+        self.__db_handler = db_handler
         self.__data_handler = data_handler
         self.__job = job
         self.done = False
@@ -47,7 +47,7 @@ class Worker(threading.Thread):
         try:
             logger.debug("starting job '{}' ...".format(self.__job.id))
             self.__job.status = models.JobStatus.running
-            model = models.Model(json.loads(self.__stg_handler.get(b"models-", self.__job.model_id.encode())))
+            model = models.Model(json.loads(self.__db_handler.get(b"models-", self.__job.model_id.encode())))
             config = event_prediction_trainer.config.config_from_dict(model.config)
             file_path, model.columns, model.default_values = self.__data_handler.get(
                 srv_id=model.service_id,
@@ -75,21 +75,21 @@ class Worker(threading.Thread):
                 )
             ).decode()
             model.created = "{}Z".format(datetime.datetime.utcnow().isoformat())
-            self.__stg_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
+            self.__db_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
             self.__job.status = models.JobStatus.finished
             logger.debug("{}: completed successfully".format(self.__job.id))
         except Exception as ex:
             self.__job.status = models.JobStatus.failed
             self.__job.reason = str(ex)
             logger.error("{}: failed - {}".format(self.__job.id, ex))
-        self.__stg_handler.put(b"jobs-", self.__job.id.encode(), json.dumps(dict(self.__job)).encode())
+        self.__db_handler.put(b"jobs-", self.__job.id.encode(), json.dumps(dict(self.__job)).encode())
         self.done = True
 
 
 class Jobs(threading.Thread):
-    def __init__(self, stg_handler: Storage, data_handler: Data, check_delay: typing.Union[int, float], max_jobs: int):
+    def __init__(self, db_handler: DB, data_handler: Data, check_delay: typing.Union[int, float], max_jobs: int):
         super().__init__(name="jobs-handler", daemon=True)
-        self.__stg_handler = stg_handler
+        self.__db_handler = db_handler
         self.__data_handler = data_handler
         self.__check_delay = check_delay
         self.__max_jobs = max_jobs
@@ -125,7 +125,7 @@ class Jobs(threading.Thread):
                     job_id = self.__job_queue.get(timeout=self.__check_delay)
                     worker = Worker(
                         job=self.__job_pool[job_id],
-                        stg_handler=self.__stg_handler,
+                        db_handler=self.__db_handler,
                         data_handler=self.__data_handler
                     )
                     self.__worker_pool[job_id] = worker

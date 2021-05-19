@@ -14,7 +14,7 @@
    limitations under the License.
 """
 
-from .storage import *
+from .db import *
 from . import configs
 from .data import *
 from .jobs import *

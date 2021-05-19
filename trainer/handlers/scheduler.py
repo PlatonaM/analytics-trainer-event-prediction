@@ -18,7 +18,7 @@ __all__ = ("Scheduler",)
 
 
 from ..logger import getLogger
-from . import Storage, Jobs
+from . import DB, Jobs
 import threading
 import time
 
@@ -27,10 +27,10 @@ logger = getLogger(__name__.split(".", 1)[-1])
 
 
 class Scheduler(threading.Thread):
-    def __init__(self, job_handler: Jobs, stg_handler: Storage, delay: int):
+    def __init__(self, job_handler: Jobs, db_handler: DB, delay: int):
         super().__init__(name="scheduler-handler", daemon=True)
         self.__job_handler = job_handler
-        self.__stg_handler = stg_handler
+        self.__db_handler = db_handler
         self.__delay = delay
 
     def run(self) -> None:
@@ -38,7 +38,7 @@ class Scheduler(threading.Thread):
             try:
                 time.sleep(self.__delay)
                 logger.debug("scheduling jobs ...")
-                for model_id in self.__stg_handler.list_keys(b"models-"):
+                for model_id in self.__db_handler.list_keys(b"models-"):
                     try:
                         self.__job_handler.create(model_id=model_id)
                     except Exception as ex:

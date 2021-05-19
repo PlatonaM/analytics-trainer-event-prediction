@@ -36,15 +36,15 @@ def reqErrorLog(req, ex):
 
 
 class Models:
-    def __init__(self, stg_handler: handlers.Storage, jobs_handler: handlers.Jobs):
-        self.__stg_handler = stg_handler
+    def __init__(self, db_handler: handlers.DB, jobs_handler: handlers.Jobs):
+        self.__db_handler = db_handler
         self.__jobs_handler = jobs_handler
 
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response):
         reqDebugLog(req)
         try:
             resp.content_type = falcon.MEDIA_JSON
-            resp.body = json.dumps(self.__stg_handler.list_keys(b"models-"))
+            resp.body = json.dumps(self.__db_handler.list_keys(b"models-"))
             resp.status = falcon.HTTP_200
         except Exception as ex:
             resp.status = falcon.HTTP_500
@@ -57,15 +57,15 @@ class Models:
             model_resp = models.ModelResponse(available=list(), pending=list())
             for m_id, m_conf in handlers.configs.get_model_id_config_list(service_id=model_req.service_id, config=model_req.ml_config):
                 try:
-                    model = models.Model(json.loads(self.__stg_handler.get(b"models-", m_id.encode())))
+                    model = models.Model(json.loads(self.__db_handler.get(b"models-", m_id.encode())))
                     if model.data:
                         model_resp.available.append(m_id)
                     else:
                         model_resp.pending.append(m_id)
                 except KeyError:
                     model = models.Model(dict(model_req), id=m_id, config=m_conf)
-                    self.__stg_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
                     self.__jobs_handler.create(model_id=model.id)
+                    self.__db_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
                     model_resp.pending.append(m_id)
             resp.content_type = falcon.MEDIA_JSON
             resp.body = json.dumps(dict(model_resp))
@@ -76,14 +76,14 @@ class Models:
 
 
 class Model:
-    def __init__(self, stg_handler: handlers.Storage):
-        self.__stg_handler = stg_handler
+    def __init__(self, db_handler: handlers.DB):
+        self.__db_handler = db_handler
 
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, model_id: str):
         reqDebugLog(req)
         try:
             resp.content_type = falcon.MEDIA_JSON
-            resp.body = self.__stg_handler.get(b"models-", model_id.encode())
+            resp.body = self.__db_handler.get(b"models-", model_id.encode())
             resp.status = falcon.HTTP_200
         except KeyError as ex:
             resp.status = falcon.HTTP_404
@@ -95,7 +95,7 @@ class Model:
     def on_delete(self, req: falcon.request.Request, resp: falcon.response.Response, model_id: str):
         reqDebugLog(req)
         try:
-            self.__stg_handler.delete(b"models-", model_id.encode())
+            self.__db_handler.delete(b"models-", model_id.encode())
             resp.status = falcon.HTTP_200
         except Exception as ex:
             resp.status = falcon.HTTP_500
@@ -103,8 +103,8 @@ class Model:
 
 
 class Jobs:
-    def __init__(self, stg_handler: handlers.Storage, jobs_handler: handlers.Jobs):
-        self.__stg_handler = stg_handler
+    def __init__(self, db_handler: handlers.DB, jobs_handler: handlers.Jobs):
+        self.__db_handler = db_handler
         self.__jobs_handler = jobs_handler
 
     def on_post(self, req: falcon.request.Request, resp: falcon.response.Response):
@@ -125,7 +125,7 @@ class Jobs:
             resp.body = json.dumps(
                 dict(
                     current=self.__jobs_handler.list_jobs(),
-                    history=self.__stg_handler.list_keys(b"jobs-")
+                    history=self.__db_handler.list_keys(b"jobs-")
                 )
             )
             resp.status = falcon.HTTP_200
@@ -135,8 +135,8 @@ class Jobs:
 
 
 class Job:
-    def __init__(self,  stg_handler: handlers.Storage, jobs_handler: handlers.Jobs):
-        self.__stg_handler = stg_handler
+    def __init__(self, db_handler: handlers.DB, jobs_handler: handlers.Jobs):
+        self.__db_handler = db_handler
         self.__jobs_handler = jobs_handler
 
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, job_id):
@@ -146,7 +146,7 @@ class Job:
             try:
                 resp.body = json.dumps(dict(self.__jobs_handler.get_job(job_id)))
             except KeyError:
-                resp.body = self.__stg_handler.get(b"jobs-", job_id.encode())
+                resp.body = self.__db_handler.get(b"jobs-", job_id.encode())
             resp.status = falcon.HTTP_200
         except KeyError as ex:
             resp.status = falcon.HTTP_404

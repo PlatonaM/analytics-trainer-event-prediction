@@ -14,7 +14,7 @@
    limitations under the License.
 """
 
-__all__ = ("Storage", )
+__all__ = ("DB",)
 
 
 from ..logger import getLogger
@@ -24,7 +24,7 @@ import threading
 logger = getLogger(__name__.split(".", 1)[-1])
 
 
-class Storage:
+class DB:
     def __init__(self, st_path):
         self.__kvs = plyvel.DB(st_path, create_if_missing=True)
         self.__lock = threading.Lock()
