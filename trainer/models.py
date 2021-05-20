@@ -64,8 +64,3 @@ class ModelResponse:
 
 
 @simple_struct.structure
-class DataSource:
-    id = None
-    start = None
-    end = None
-    year_map = None
