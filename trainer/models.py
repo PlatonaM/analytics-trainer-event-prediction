@@ -64,3 +64,15 @@ class ModelResponse:
 
 
 @simple_struct.structure
+class MetaData:
+    source_id: str = None
+    time_field: str = None
+    delimiter: str = None
+    # sources: dict = None
+    # size: int = 0
+    created: str = None
+    columns: list = None
+    default_values: dict = None
+    # file: str = None
+    checksum = None
+    compressed = None
