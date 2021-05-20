@@ -52,5 +52,5 @@ for route in routes:
     app.add_route(*route)
 
 jobs_handler.start()
-skd_handler.start()
 data_handler.start()
+# skd_handler.start()
