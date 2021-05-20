@@ -49,11 +49,7 @@ class Worker(threading.Thread):
             self.__job.status = models.JobStatus.running
             model = models.Model(json.loads(self.__db_handler.get(b"models-", self.__job.model_id.encode())))
             config = event_prediction_trainer.config.config_from_dict(model.config)
-            file_path, model.columns, model.default_values = self.__data_handler.get(
-                srv_id=model.service_id,
-                time_field=model.time_field,
-                delimiter=","
-            )
+            file_path, model.columns, model.default_values = self.__data_handler.get(source_id=model.service_id)
             logger.debug(
                 "{}: training model for prediction of '{}' for '{}' ...".format(
                     self.__job.id, config["target_errorCode"],
@@ -138,4 +134,4 @@ class Jobs(threading.Thread):
                 if self.__worker_pool[job_id].done:
                     del self.__worker_pool[job_id]
                     del self.__job_pool[job_id]
-                    # self.__stg_handler.delete(b"jobs-", job_id.encode())
+                    # self.__db_handler.delete(b"jobs-", job_id.encode())
