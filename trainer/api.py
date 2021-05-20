@@ -64,8 +64,8 @@ class Models:
                         model_resp.pending.append(m_id)
                 except KeyError:
                     model = models.Model(dict(model_req), id=m_id, config=m_conf)
-                    self.__jobs_handler.create(model_id=model.id)
                     self.__db_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
+                    self.__jobs_handler.create(model_id=model.id)
                     model_resp.pending.append(m_id)
             resp.content_type = falcon.MEDIA_JSON
             resp.body = json.dumps(dict(model_resp))
