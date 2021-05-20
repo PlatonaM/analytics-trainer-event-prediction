@@ -34,14 +34,8 @@ class Conf:
 
     @simple_env_var.section
     class Data:
-        db_api_url = "http://test"
-        export_api_url = "http://test"
-        time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
-        db_api_time_format = "2006-01-02T15:04:05.000000Z07:00"
-        start_year = 1970
-        chunk_size = 50000
-        usr_id = None
-        max_age = 21600
+        api_url = "http://test"
+        max_age = 1800
 
     @simple_env_var.section
     class Jobs:
