@@ -51,6 +51,7 @@ routes = (
 for route in routes:
     app.add_route(*route)
 
+data_handler.purge_cache()
 jobs_handler.start()
 data_handler.start()
 # skd_handler.start()
