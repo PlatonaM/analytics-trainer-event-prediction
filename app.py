@@ -54,4 +54,4 @@ for route in routes:
 data_handler.purge_cache()
 jobs_handler.start()
 data_handler.start()
-# skd_handler.start()
+skd_handler.start()
