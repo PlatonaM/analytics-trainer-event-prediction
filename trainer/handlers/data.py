@@ -130,3 +130,10 @@ class Data(threading.Thread):
                         logger.warning("could not remove stale data - {}".format(ex))
                     del self.__cache[key]
             stale_items.clear()
+
+    def purge_cache(self):
+        for file in os.listdir(self.__st_path):
+            try:
+                os.remove(os.path.join(self.__st_path, file))
+            except Exception:
+                pass
