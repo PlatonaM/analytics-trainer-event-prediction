@@ -18,7 +18,7 @@
 import simple_struct
 
 
-__all__ = ("Job", "JobStatus", "Model", "ModelResponse", "ModelRequest", "DataSource")
+__all__ = ("Job", "JobStatus", "Model", "ModelResponse", "ModelRequest", "MetaData")
 
 
 class JobStatus:
