@@ -39,6 +39,7 @@ class CacheItem:
         self.default_values = None
         self.checksum = None
         self.created = None
+        self.time_field = None
         self.lock = threading.Lock()
 
 
@@ -89,12 +90,12 @@ class Data(threading.Thread):
             logger.warning("checksum mismatch for '{}' - refreshing metadata".format(source_id))
             metadata = self.__get_metadata(source_id)
             count = count + 1
-        return file_name, metadata.columns, metadata.default_values, metadata.checksum
+        return file_name, metadata.columns, metadata.default_values, metadata.checksum, metadata.time_field
 
     def __refresh_cache_item(self, source_id: str, cache_item: CacheItem):
-        cache_item.file, cache_item.columns, cache_item.default_values, cache_item.checksum = self.__get(source_id=source_id)
+        cache_item.file, cache_item.columns, cache_item.default_values, cache_item.checksum, cache_item.time_field = self.__get(source_id=source_id)
 
-    def get(self, source_id: str) -> typing.Tuple[str, list, dict]:
+    def get(self, source_id: str) -> typing.Tuple[str, list, dict, str]:
         with self.__lock:
             if source_id not in self.__cache:
                 self.__cache[source_id] = CacheItem()
@@ -113,7 +114,7 @@ class Data(threading.Thread):
                     except Exception as ex:
                         logger.warning("could not remove stale data - {}".format(ex))
                 cache_item.created = time.time()
-            return os.path.join(self.__st_path, cache_item.file), cache_item.columns, cache_item.default_values
+            return os.path.join(self.__st_path, cache_item.file), cache_item.columns, cache_item.default_values, cache_item.time_field
 
     def run(self) -> None:
         stale_items = list()
