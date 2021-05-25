@@ -54,7 +54,7 @@ class Model:
 class ModelRequest:
     service_id = None
     ml_config = None
-    time_field = None
+    # time_field = None
 
 
 @simple_struct.structure
