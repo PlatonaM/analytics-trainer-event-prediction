@@ -73,34 +73,37 @@ class Result:
         self.error = False
 
 
-class Worker(threading.Thread):
-    def __init__(self, job: models.Job, db_handler: DB, data_handler: Data):
+class Worker(multiprocessing.Process):
+    def __init__(self, job: models.Job, model_item: models.Model, data_handler: Data):
         super().__init__(name="jobs-worker-{}".format(job.id), daemon=True)
-        self.__db_handler = db_handler
+        self.__model_item = model_item
         self.__data_handler = data_handler
         self.__job = job
-        self.done = False
+        self.result = multiprocessing.Queue()
 
     def run(self) -> None:
+        signal.signal(signal.SIGTERM, handle_sigterm)
+        signal.signal(signal.SIGINT, handle_sigterm)
+        result_obj = Result()
         try:
             logger.debug("starting job '{}' ...".format(self.__job.id))
             self.__job.status = models.JobStatus.running
-            model = models.Model(json.loads(self.__db_handler.get(b"models-", self.__job.model_id.encode())))
-            config = event_prediction_trainer.config.config_from_dict(model.config)
-            file_path, model.columns, model.default_values, model.time_field = self.__data_handler.get(source_id=model.service_id)
+            config = event_prediction_trainer.config.config_from_dict(self.__model_item.config)
+            files, self.__model_item.columns, self.__model_item.default_values, self.__model_item.time_field = self.__data_handler.get(source_id=self.__model_item.service_id)
+            input_path = ConcatenatedFile(files=files).build_input()
             logger.debug(
                 "{}: training model for prediction of '{}' for '{}' ...".format(
                     self.__job.id, config["target_errorCode"],
                     config["target_col"]
                 )
             )
-            model.data = base64.standard_b64encode(
+            self.__model_item.data = base64.standard_b64encode(
                 gzip.compress(
                     event_prediction_trainer.pipeline.clf_to_pickle_bytes(
                         event_prediction_trainer.pipeline.run_pipeline(
                             df=event_prediction_trainer.pipeline.df_from_csv(
-                                csv_path=file_path,
-                                time_col=model.time_field,
+                                csv_path=input_path,
+                                time_col=self.__model_item.time_field,
                                 sorted=True
                             ),
                             config=config
@@ -108,16 +111,17 @@ class Worker(threading.Thread):
                     )
                 )
             ).decode()
-            model.created = "{}Z".format(datetime.datetime.utcnow().isoformat())
-            self.__db_handler.put(b"models-", model.id.encode(), json.dumps(dict(model)).encode())
+            self.__model_item.created = "{}Z".format(datetime.datetime.utcnow().isoformat())
+            result_obj.model_item = self.__model_item
             self.__job.status = models.JobStatus.finished
             logger.debug("{}: completed successfully".format(self.__job.id))
         except Exception as ex:
             self.__job.status = models.JobStatus.failed
             self.__job.reason = str(ex)
             logger.error("{}: failed - {}".format(self.__job.id, ex))
-        self.__db_handler.put(b"jobs-", self.__job.id.encode(), json.dumps(dict(self.__job)).encode())
-        self.done = True
+            result_obj.error = True
+        result_obj.job = self.__job
+        self.result.put(result_obj)
 
 
 class Jobs(threading.Thread):
@@ -160,7 +164,7 @@ class Jobs(threading.Thread):
                         job_id = self.__job_queue.get(timeout=self.__check_delay)
                         worker = Worker(
                             job=self.__job_pool[job_id],
-                            db_handler=self.__db_handler,
+                            model_item=models.Model(json.loads(self.__db_handler.get(b"models-", self.__job_pool[job_id].model_id.encode()))),
                             data_handler=self.__data_handler
                         )
                         self.__worker_pool[job_id] = worker
@@ -170,9 +174,13 @@ class Jobs(threading.Thread):
                 else:
                     time.sleep(self.__check_delay)
                 for job_id in list(self.__worker_pool.keys()):
-                    if self.__worker_pool[job_id].done:
+                    if not self.__worker_pool[job_id].is_alive():
+                        res = self.__worker_pool[job_id].result.get()
+                        self.__db_handler.put(b"jobs-", res.job.id.encode(), json.dumps(dict(res.job)).encode())
+                        if not res.error:
+                            self.__db_handler.put(b"models-", res.model_item.id.encode(), json.dumps(dict(res.model_item)).encode())
+                        self.__worker_pool[job_id].close()
                         del self.__worker_pool[job_id]
                         del self.__job_pool[job_id]
-                        # self.__db_handler.delete(b"jobs-", job_id.encode())
             except Exception as ex:
                 logger.error("job handling failed - {}".format(ex))
