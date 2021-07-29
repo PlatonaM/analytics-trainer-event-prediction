@@ -63,22 +63,21 @@ class Data(threading.Thread):
             raise RuntimeError("no data available for '{}'".format(source_id))
         return metadata
 
-    def __get_data(self, source_id: str, compressed: bool):
-        with requests.get(url="{}/{}/file".format(self.__data_api_url, urllib.parse.quote(source_id)), stream=True) as resp:
-            if not resp.ok:
-                raise RuntimeError(resp.status_code)
-            file_name = uuid.uuid4().hex
-            checksum = hashlib.sha256()
-            with open(os.path.join(self.__st_path, file_name), "wb") as file:
-                if compressed:
-                    file = util.Decompress(file)
-                buffer = resp.raw.read(self.__chunk_size)
-                checksum.update(buffer)
-                while buffer:
-                    file.write(buffer)
-                    buffer = resp.raw.read(self.__chunk_size)
-                    checksum.update(buffer)
-        return file_name, checksum.hexdigest()
+    def __get_data(self, source_id: str, files: list, compressed: bool):
+        checksum = hashlib.sha256()
+        retries = 0
+        chunk_count = 0
+        for file in files:
+            chunk_count += 1
+            logger.debug("retrieving chunk {}/{} for '{}' ...".format(chunk_count, len(files), source_id))
+            try:
+                self.__get_chunk(source_id=source_id, file=file, checksum=checksum, compressed=compressed)
+            except Exception as ex:
+                if retries >= 5:
+                    logger.error("retrieving chunk {}/{} for '{}' failed - {}".format(chunk_count, len(files), source_id, ex))
+                    raise ex
+                retries += 1
+        return checksum.hexdigest()
 
     def __get(self, source_id: str):
         metadata = self.get_metadata(source_id)
