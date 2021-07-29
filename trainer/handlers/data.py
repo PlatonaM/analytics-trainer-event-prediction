@@ -110,7 +110,7 @@ class Data(threading.Thread):
     def __refresh_cache_item(self, source_id: str, cache_item: CacheItem):
         cache_item.files, cache_item.columns, cache_item.default_values, cache_item.checksum, cache_item.time_field = self.__get_new(source_id=source_id)
 
-    def get(self, source_id: str) -> typing.Tuple[str, list, dict, str]:
+    def get(self, source_id: str) -> typing.Tuple[list, list, dict, str]:
         with self.__lock:
             if source_id not in self.__cache:
                 self.__cache[source_id] = CacheItem()
@@ -118,18 +118,18 @@ class Data(threading.Thread):
         with cache_item.lock:
             if not cache_item.files:
                 self.__refresh_cache_item(source_id, cache_item)
-                cache_item.created = time.time()
             elif time.time() - cache_item.created > self.__max_age:
                 metadata = self.get_metadata(source_id)
                 if metadata.checksum != cache_item.checksum:
-                    old_file = cache_item.files
+                    old_files = cache_item.files
                     self.__refresh_cache_item(source_id, cache_item)
-                    try:
-                        os.remove(os.path.join(self.__st_path, old_file))
-                    except Exception as ex:
-                        logger.warning("could not remove stale data - {}".format(ex))
+                    for old_file in old_files:
+                        try:
+                            os.remove(os.path.join(self.__st_path, old_file))
+                        except Exception as ex:
+                            logger.warning("could not remove stale data - {}".format(ex))
                 cache_item.created = time.time()
-            return os.path.join(self.__st_path, cache_item.files), cache_item.columns, cache_item.default_values, cache_item.time_field
+            return [os.path.join(self.__st_path, file) for file in cache_item.files], cache_item.columns, cache_item.default_values, cache_item.time_field
 
     def run(self) -> None:
         stale_items = list()
