@@ -34,7 +34,7 @@ logger = getLogger(__name__.split(".", 1)[-1])
 
 class CacheItem:
     def __init__(self):
-        self.file = None
+        self.files = None
         self.columns = None
         self.default_values = None
         self.checksum = None
@@ -108,7 +108,7 @@ class Data(threading.Thread):
         return metadata.files, metadata.columns, metadata.default_values, metadata.checksum, metadata.time_field
 
     def __refresh_cache_item(self, source_id: str, cache_item: CacheItem):
-        cache_item.file, cache_item.columns, cache_item.default_values, cache_item.checksum, cache_item.time_field = self.__get_new(source_id=source_id)
+        cache_item.files, cache_item.columns, cache_item.default_values, cache_item.checksum, cache_item.time_field = self.__get_new(source_id=source_id)
 
     def get(self, source_id: str) -> typing.Tuple[str, list, dict, str]:
         with self.__lock:
@@ -116,20 +116,20 @@ class Data(threading.Thread):
                 self.__cache[source_id] = CacheItem()
         cache_item = self.__cache[source_id]
         with cache_item.lock:
-            if not cache_item.file:
+            if not cache_item.files:
                 self.__refresh_cache_item(source_id, cache_item)
                 cache_item.created = time.time()
             elif time.time() - cache_item.created > self.__max_age:
                 metadata = self.get_metadata(source_id)
                 if metadata.checksum != cache_item.checksum:
-                    old_file = cache_item.file
+                    old_file = cache_item.files
                     self.__refresh_cache_item(source_id, cache_item)
                     try:
                         os.remove(os.path.join(self.__st_path, old_file))
                     except Exception as ex:
                         logger.warning("could not remove stale data - {}".format(ex))
                 cache_item.created = time.time()
-            return os.path.join(self.__st_path, cache_item.file), cache_item.columns, cache_item.default_values, cache_item.time_field
+            return os.path.join(self.__st_path, cache_item.files), cache_item.columns, cache_item.default_values, cache_item.time_field
 
     def run(self) -> None:
         stale_items = list()
@@ -141,7 +141,7 @@ class Data(threading.Thread):
                         stale_items.append(key)
                 for key in stale_items:
                     try:
-                        os.remove(os.path.join(self.__st_path, self.__cache[key].file))
+                        os.remove(os.path.join(self.__st_path, self.__cache[key].files))
                     except Exception as ex:
                         logger.warning("could not remove stale data - {}".format(ex))
                     del self.__cache[key]
