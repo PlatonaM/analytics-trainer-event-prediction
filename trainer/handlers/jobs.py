@@ -65,6 +65,14 @@ class ConcatenatedFile:
         return path
 # <-------------------------------------------------------------
 
+
+class Result:
+    def __init__(self):
+        self.model_item: typing.Optional[models.Model] = None
+        self.job: typing.Optional[models.Job] = None
+        self.error = False
+
+
 class Worker(threading.Thread):
     def __init__(self, job: models.Job, db_handler: DB, data_handler: Data):
         super().__init__(name="jobs-worker-{}".format(job.id), daemon=True)
