@@ -97,15 +97,15 @@ class Data(threading.Thread):
 
     def __get_new(self, source_id: str):
         metadata = self.get_metadata(source_id)
-        file_name, checksum = self.__get_data(source_id, metadata.compressed)
-        count = 0
+        checksum = self.__get_data(source_id, metadata.files, metadata.compressed)
+        retries = 0
         while metadata.checksum != checksum:
-            if count > 3:
+            if retries > 3:
                 raise RuntimeError("checksum mismatch for '{}' - data might have changed")
             logger.warning("checksum mismatch for '{}' - refreshing metadata".format(source_id))
             metadata = self.get_metadata(source_id)
-            count = count + 1
-        return file_name, metadata.columns, metadata.default_values, metadata.checksum, metadata.time_field
+            retries += 1
+        return metadata.files, metadata.columns, metadata.default_values, metadata.checksum, metadata.time_field
 
     def __refresh_cache_item(self, source_id: str, cache_item: CacheItem):
         cache_item.file, cache_item.columns, cache_item.default_values, cache_item.checksum, cache_item.time_field = self.__get_new(source_id=source_id)
