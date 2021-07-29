@@ -41,6 +41,30 @@ logger = getLogger(__name__.split(".", 1)[-1])
 def handle_sigterm(signo, stack_frame):
     logger.debug("got signal '{}' - exiting ...".format(signo))
     sys.exit(0)
+
+
+# temporary workaround for code not supporting chunked data --->
+class ConcatenatedFile:
+    def __init__(self, files):
+        self.__chunks = files
+
+    def __read(self, n=65536):
+        for chunk in self.__chunks:
+            file = open(chunk, "rb")
+            buffer = file.read(n)
+            while buffer:
+                yield buffer
+                buffer = file.read(n)
+            file.close()
+
+    def build_input(self):
+        path = "/data_cache/{}".format(uuid.uuid4().hex)
+        with open(path, "wb") as file:
+            for buffer in self.__read():
+                file.write(buffer)
+        return path
+# <-------------------------------------------------------------
+
 class Worker(threading.Thread):
     def __init__(self, job: models.Job, db_handler: DB, data_handler: Data):
         super().__init__(name="jobs-worker-{}".format(job.id), daemon=True)
