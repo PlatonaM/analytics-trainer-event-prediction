@@ -18,19 +18,22 @@ __all__ = ("Scheduler",)
 
 
 from ..logger import getLogger
-from . import DB, Jobs
+from .. import models
+from . import DB, Jobs, Data
 import threading
 import time
+import json
 
 
 logger = getLogger(__name__.split(".", 1)[-1])
 
 
 class Scheduler(threading.Thread):
-    def __init__(self, job_handler: Jobs, db_handler: DB, delay: int):
+    def __init__(self, job_handler: Jobs, db_handler: DB, data_handler: Data, delay: int):
         super().__init__(name="scheduler-handler", daemon=True)
         self.__job_handler = job_handler
         self.__db_handler = db_handler
+        self.__data_handler = data_handler
         self.__delay = delay
 
     def run(self) -> None:
@@ -38,9 +41,12 @@ class Scheduler(threading.Thread):
             try:
                 time.sleep(self.__delay)
                 logger.debug("scheduling jobs ...")
-                for model_id in self.__db_handler.list_keys(b"models-"):
+                for model_id in self.__db_handler.list_keys(b"model-"):
                     try:
-                        self.__job_handler.create(model_id=model_id)
+                        model = models.Model(json.loads(self.__db_handler.get(b"model-", model_id.encode())))
+                        meta_data = self.__data_handler.get_metadata(model.service_id)
+                        if meta_data.checksum != model.data_checksum:
+                            self.__job_handler.create(model_id=model_id)
                     except Exception as ex:
                         logger.error("scheduling job for model '{}' failed - {}".format(model_id, ex))
             except Exception as ex:
