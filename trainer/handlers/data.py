@@ -63,6 +63,22 @@ class Data(threading.Thread):
             raise RuntimeError("no data available for '{}'".format(source_id))
         return metadata
 
+    def __get_chunk(self, source_id: str, file: str, checksum: hashlib.sha256, compressed: bool):
+        with requests.get(url="{}/{}/files/{}".format(self.__data_api_url, urllib.parse.quote(source_id), file),
+                          stream=True) as resp:
+            if not resp.ok:
+                raise RuntimeError(resp.status_code)
+            with open(os.path.join(self.__st_path, file), "wb") as file:
+                if compressed:
+                    file = util.Decompress(file)
+                buffer = resp.raw.read(self.__chunk_size)
+                checksum.update(buffer)
+                while buffer:
+                    file.write(buffer)
+                    buffer = resp.raw.read(self.__chunk_size)
+                    checksum.update(buffer)
+                file.flush()
+
     def __get_data(self, source_id: str, files: list, compressed: bool):
         checksum = hashlib.sha256()
         retries = 0
