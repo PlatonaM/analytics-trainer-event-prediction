@@ -17,6 +17,8 @@ Models, and corresponding metadata as well as configurations are provided via an
 
 `CONF_JOBS_SKD_DELAY`: Control how often jobs for training models are scheduled.
 
+`CONF_JOBS_SKD_ENABLED`: Determine if job scheduler runs.
+
 `CONF_DATA_API_URL`: URL of analytics-csv-provider API.
 
 `CONF_DATA_MAX_AGE`: Set how long training data will be cached.
